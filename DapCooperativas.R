@@ -1,3 +1,4 @@
+
 #filtra para exibir apenas os resultados do RS
 
 DAP_cooperativas <- DAP_cooperativas %>%
@@ -25,8 +26,6 @@ empenhos_para_cooperativas <- empenhos_para_cooperativas %>%
 empenhos_para_cooperativas <- empenhos_para_cooperativas  %>%
   mutate(vl_liquidacao = tidyr::replace_na(vl_liquidacao, 0))
 
-empenhos_para_cooperativas <- empenhos_para_cooperativas  %>%
-  mutate(id_contrato = tidyr::replace_na(id_contrato, 0))
 
 #criando tabela com quantidade de contratos concluidos de cadas prefeitura com
 #cada cooperativa e tambem a quantidade de contratos concluidos totais dessa prefeitura
@@ -81,3 +80,17 @@ contrato_totais_com_cooperativas <- soma_total_liq_orgao_para_cooperativas %>%
 contrato_totais_com_cooperativas <- contrato_totais_com_cooperativas %>%
   arrange(desc(soma_liq))
 
+#liquidacao total orgao para comparacao com cooperativa
+liquidacao_orgao <- empenho %>%
+  mutate(vl_liquidacao = tidyr::replace_na(vl_liquidacao, 0)) %>%
+  group_by(id_orgao) %>%
+  summarise(somas_liquidacoes = sum(vl_liquidacao))
+#comparacao
+teste_grafico <- liquidacao_orgao %>%
+  left_join(select(soma_total_liq_orgao_para_cooperativas,id_orgao,soma_liq), by="id_orgao")
+
+teste_grafico <- teste_grafico %>%
+  mutate(soma_liq= tidyr::replace_na(soma_liq, 0)) %>%
+  mutate(perct = (100*soma_liq)/somas_liquidacoes)
+
+pie(table(teste_grafico), main="Gráfico de setores:liquidação total x liq para cooperativas", col=c("red", "blue")) 
