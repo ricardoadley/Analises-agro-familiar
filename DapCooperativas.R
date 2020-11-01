@@ -62,7 +62,7 @@ contrato_totais_com_cooperativas <- unique(contrato_totais_com_cooperativas)
 
 soma_total_liq_orgao_para_cooperativas<- empenhos_para_cooperativas %>%
   group_by(id_orgao )%>%
-  summarise(soma_liq = sum(vl_liquidacao))
+  summarise(soma_liq_cooperativas = sum(vl_liquidacao))
 
 #ordenacao por id das prefeituras
 
@@ -78,7 +78,7 @@ contrato_totais_com_cooperativas <- soma_total_liq_orgao_para_cooperativas %>%
 #ordenacao por soma total das liquidacoes da maior para a menor
 
 contrato_totais_com_cooperativas <- contrato_totais_com_cooperativas %>%
-  arrange(desc(soma_liq))
+  arrange(desc(soma_liq_cooperativas))
 
 #liquidacao total orgao para comparacao com cooperativa
 liquidacao_orgao <- empenho %>%
@@ -86,11 +86,10 @@ liquidacao_orgao <- empenho %>%
   group_by(id_orgao) %>%
   summarise(somas_liquidacoes = sum(vl_liquidacao))
 #comparacao
-teste_grafico <- liquidacao_orgao %>%
-  left_join(select(soma_total_liq_orgao_para_cooperativas,id_orgao,soma_liq), by="id_orgao")
+porcentagem_para_cooperativas_e_pj<- liquidacao_orgao %>%
+  left_join(select(soma_total_liq_orgao_para_cooperativas,id_orgao,soma_liq_cooperativas), by="id_orgao")
 
-teste_grafico <- teste_grafico %>%
-  mutate(soma_liq= tidyr::replace_na(soma_liq, 0)) %>%
-  mutate(perct = (100*soma_liq)/somas_liquidacoes)
+porcentagem_para_cooperativas_e_pj <- porcentagem_para_cooperativas_e_pj %>%
+  mutate(soma_liq_cooperativas= tidyr::replace_na(soma_liq_cooperativas, 0)) %>%
+  mutate(perct = (100*soma_liq_cooperativas)/somas_liquidacoes)
 
-pie(table(teste_grafico), main="Gráfico de setores:liquidação total x liq para cooperativas", col=c("red", "blue")) 
